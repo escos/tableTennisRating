@@ -10,9 +10,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -27,7 +25,7 @@ public class TTRating {
         parseXlsFile();
     }
 
-    private static  File downloadArchive(String zipName, String zipLink) {
+    private static File downloadArchive(String zipName, String zipLink) {
         Logger logger = Logger.getLogger(Constants.APPLICATION_LOGGER);
         File ratingArchive = new File(zipName);
         Calendar cal = Calendar.getInstance();
@@ -67,46 +65,48 @@ public class TTRating {
         }
     }
 
-    private static void parseXlsFile() {
-        try
-        {
-            FileInputStream file = new FileInputStream(new File("C:\\Users\\Роман\\Desktop\\tableTennisRating\\test.xls"));
+    private static List<Sportsman> parseXlsFile() {
+        List<Sportsman> tennisists = new ArrayList<Sportsman>();
+        try {
+            FileInputStream file = new FileInputStream(new File("C:\\Users\\Роман\\Desktop\\tableTennisRating\\rate0.xls"));
 
             HSSFWorkbook workbook = new HSSFWorkbook(file);
 
-            //Get first/desired sheet from the workbook
             HSSFSheet sheet = workbook.getSheetAt(0);
 
-            //Iterate through each rows one by one
             Iterator<Row> rowIterator = sheet.iterator();
-            while (rowIterator.hasNext())
-            {
-                Row row = rowIterator.next();
-                //For each row, iterate through all the columns
-                Iterator<Cell> cellIterator = row.cellIterator();
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
+            }
+            while (rowIterator.hasNext()) {
+                HSSFRow row = (HSSFRow) rowIterator.next();
+                //Получаем ячейки из строки по номерам столбцов
+                HSSFCell nameCell = row.getCell(Constants.NAME_COLUMN_NUMBER);
+                HSSFCell teamCell = row.getCell(Constants.TEAM_COLUMN_NUMBER);
+                HSSFCell ratingCell = row.getCell(Constants.TEAM_COLUMN_NUMBER);
+                // Если в первом столбце нет данных, то контакт не создаём
+                if (nameCell != null) {
+                    Sportsman sportsman = new Sportsman();
+                    sportsman.setName(nameCell.getStringCellValue()); //Получаем строковое значение из ячейки
 
-                while (cellIterator.hasNext())
-                {
-                    Cell cell = cellIterator.next();
-                    //Check the cell type and format accordingly
-                    switch (cell.getCellType()) {
-                        case Cell.CELL_TYPE_STRING:
-                            System.out.print(cell.getStringCellValue());
-                            break;
-                        case Cell.CELL_TYPE_NUMERIC:
-                            System.out.print(cell.getNumericCellValue());
-                            break;
+                    sportsman.setTeam("");
+                    if (teamCell != null && !"".equals(teamCell.getStringCellValue())) {
+                        sportsman.setTeam(teamCell.getStringCellValue()); //Адрес - строка
                     }
-                    System.out.print(" - ");
+
+                    sportsman.setRating(0);
+                    if (ratingCell != null && !"".equals(ratingCell.getStringCellValue())) {
+                        sportsman.setRating(ratingCell.getNumericCellValue());
+                    }
+                    tennisists.add(sportsman);
+
                 }
-                System.out.println();
             }
             file.close();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        return tennisists;
     }
 }
 //http://www.ttlife.ru/files/spb/2016_10.zip
