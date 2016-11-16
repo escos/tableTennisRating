@@ -1,9 +1,9 @@
 
 public class Sportsman {
-    private String name;
-    private String team;
-    private double rating;
-    private int sportsmanID;
+    public String name;
+    public String team;
+    public double rating;
+    public int sportsmanID;
 
     public String getName() {
         return name;

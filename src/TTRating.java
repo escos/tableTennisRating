@@ -22,7 +22,8 @@ public class TTRating {
         //String zipName = "rating";
         //String zipLink = "http://www.ttlife.ru/files/spb/";
         //TTRating.decompressRatingArchive(downloadArchive(zipName, zipLink));
-        parseXlsFile();
+
+        printListOfSportsmen(parseXlsFile());
     }
 
     private static File downloadArchive(String zipName, String zipLink) {
@@ -66,9 +67,10 @@ public class TTRating {
     }
 
     private static List<Sportsman> parseXlsFile() {
-        List<Sportsman> tennisists = new ArrayList<Sportsman>();
+        List<Sportsman> tennisists = new ArrayList<>();
         try {
-            FileInputStream file = new FileInputStream(new File("C:\\Users\\Роман\\Desktop\\tableTennisRating\\rate0.xls"));
+            FileInputStream file = new FileInputStream(new File("C:\\Users\\Роман\\Desktop" +
+                    "\\tableTennisRating\\files\\rate0.xls"));
 
             HSSFWorkbook workbook = new HSSFWorkbook(file);
 
@@ -77,25 +79,26 @@ public class TTRating {
             Iterator<Row> rowIterator = sheet.iterator();
             if (rowIterator.hasNext()) {
                 rowIterator.next();
+                rowIterator.next();
+                rowIterator.next();
             }
             while (rowIterator.hasNext()) {
                 HSSFRow row = (HSSFRow) rowIterator.next();
                 //Получаем ячейки из строки по номерам столбцов
                 HSSFCell nameCell = row.getCell(Constants.NAME_COLUMN_NUMBER);
                 HSSFCell teamCell = row.getCell(Constants.TEAM_COLUMN_NUMBER);
-                HSSFCell ratingCell = row.getCell(Constants.TEAM_COLUMN_NUMBER);
+                HSSFCell ratingCell = row.getCell(Constants.RATING_COLUMN_NUMBER);
                 // Если в первом столбце нет данных, то контакт не создаём
                 if (nameCell != null) {
                     Sportsman sportsman = new Sportsman();
-                    sportsman.setName(nameCell.getStringCellValue()); //Получаем строковое значение из ячейки
-
+                    sportsman.setName(nameCell.getStringCellValue());
                     sportsman.setTeam("");
-                    if (teamCell != null && !"".equals(teamCell.getStringCellValue())) {
-                        sportsman.setTeam(teamCell.getStringCellValue()); //Адрес - строка
+                    if (teamCell != null ) {
+                        sportsman.setTeam(teamCell.getStringCellValue());
                     }
 
                     sportsman.setRating(0);
-                    if (ratingCell != null && !"".equals(ratingCell.getStringCellValue())) {
+                    if (ratingCell != null && !"".equals(ratingCell.getNumericCellValue())) {
                         sportsman.setRating(ratingCell.getNumericCellValue());
                     }
                     tennisists.add(sportsman);
@@ -107,6 +110,12 @@ public class TTRating {
             e.printStackTrace();
         }
         return tennisists;
+    }
+
+    private static void printListOfSportsmen(List<Sportsman> tennisists) {
+        for (int i = 0; i < tennisists.size(); i++) {
+            System.out.printf("ФИО: %20s, Команда: %20s, Рейтинг: %5.1f\n", tennisists.get(i).name, tennisists.get(i).team, tennisists.get(i).rating);
+        }
     }
 }
 //http://www.ttlife.ru/files/spb/2016_10.zip
